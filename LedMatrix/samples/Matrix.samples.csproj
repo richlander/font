@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>11</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../LedMatrix.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="IoT.Device.Bindings" Version="2.2.0" />
+  </ItemGroup>
+
+</Project>

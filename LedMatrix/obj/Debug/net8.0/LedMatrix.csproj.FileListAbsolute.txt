@@ -1,0 +1,12 @@
+/Users/rich/git/font/LedMatrix/bin/Debug/net8.0/LedMatrix.deps.json
+/Users/rich/git/font/LedMatrix/bin/Debug/net8.0/LedMatrix.dll
+/Users/rich/git/font/LedMatrix/bin/Debug/net8.0/LedMatrix.pdb
+/Users/rich/git/font/LedMatrix/obj/Debug/net8.0/LedMatrix.csproj.AssemblyReference.cache
+/Users/rich/git/font/LedMatrix/obj/Debug/net8.0/LedMatrix.GeneratedMSBuildEditorConfig.editorconfig
+/Users/rich/git/font/LedMatrix/obj/Debug/net8.0/LedMatrix.AssemblyInfoInputs.cache
+/Users/rich/git/font/LedMatrix/obj/Debug/net8.0/LedMatrix.AssemblyInfo.cs
+/Users/rich/git/font/LedMatrix/obj/Debug/net8.0/LedMatrix.csproj.CoreCompileInputs.cache
+/Users/rich/git/font/LedMatrix/obj/Debug/net8.0/LedMatrix.dll
+/Users/rich/git/font/LedMatrix/obj/Debug/net8.0/refint/LedMatrix.dll
+/Users/rich/git/font/LedMatrix/obj/Debug/net8.0/LedMatrix.pdb
+/Users/rich/git/font/LedMatrix/obj/Debug/net8.0/ref/LedMatrix.dll
