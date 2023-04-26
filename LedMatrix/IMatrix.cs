@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Device.Gpio;
 
 namespace Iot.Device.Matrix
 {
@@ -23,7 +24,7 @@ namespace Iot.Device.Matrix
         /// <summary>
         /// Indexer for matrix.
         /// </summary>
-        int this[int x, int y] { get; set; }
+        PinValue this[int x, int y] { get; set; }
 
         /// <summary>
         /// Fill LEDs (0 is dark; 255 is all lit).

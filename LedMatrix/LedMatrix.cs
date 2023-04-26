@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Threading;
 using Iot.Device.Graphics;
 
 namespace Iot.Device.Matrix
@@ -17,56 +18,88 @@ namespace Iot.Device.Matrix
         /// <summary>
         /// Initialize LedMatrix.
         /// </summary>
-        public LedMatrix(IMatrix matrix)
-        : this(matrix, new Font5x8())
-        {
-        }
-
-        /// <summary>
-        /// Initialize LedMatrix.
-        /// </summary>
         public LedMatrix(IMatrix matrix, BdfFont font)
         {
             _matrix = matrix;
             _font = font;
         }
 
+        // Scroll text from right to left
+        // Example:
+        // text: 20 characters * 10 width font
+        // matrix: 100 width
+        // viewport = matrix-width / font-width
+        // 
+        public void ScrollingText(ReadOnlySpan<char> text, int delay)
+        {
+            int viewport = _matrix.Width / _font.Width;
+            int columns = (_font.Width * text.Length) + _matrix.Width;
+            int width = _matrix.Width;
+            int negativeWidth = 0 - _font.Width;
+            int start = 0;
+            for (int i = 0; i < columns; i++)
+            {
+                width -= 1;
+
+                if (width <= negativeWidth)
+                {
+                    width += _font.Width;
+                    start++;
+                }
+
+                DrawText(text.Slice(start), width);
+                Thread.Sleep(delay);
+            }
+        }
+
         /// <summary>
         /// Draw text on the LED matrix.
         /// </summary>
-        public void DrawLetter(char letter, int x = 0, int y = 0)
+        public void DrawText(ReadOnlySpan<char> value, int x = 0, int y = 0)
+        {
+            int rollingX = x;
+            int negativeWidth = _font.Width * -1;
+
+            foreach(char c in value)
+            {
+                if (rollingX >= _matrix.Width)
+                {
+                    break;
+                }
+                
+                DrawLetter(c, rollingX, y);
+                rollingX += _font.Width;
+            }
+        }
+
+        /// <summary>
+        /// Draw text on the LED matrix.
+        /// </summary>
+        public void DrawLetter(char value, int x = 0, int y = 0)
         {
             int width = _matrix.Width;
             int height = _matrix.Height;
             BdfFont font = _font;
 
-            if (x is < 0 || x >= width)
-            {
-                throw new ArgumentException($"{nameof(x)} ({x}) is out of range.");
-            }
-
-            if (y is < 0 || y >= height)
-            {
-                throw new ArgumentException($"{nameof(y)} ({y}) is out of range.");
-            }
-
-            // height of letter given x offset
-            int letterHeight = Math.Min(height - y, font.Height);
-            // width of letter given y offset
-            int letterWidth = x + font.Width >= width ? width - x : font.Width;
+            int firstColumnToDraw = x < 0 ? Math.Abs(x) : 0;
+            int lastColumnToDraw = x + font.Width > width ? width - x : font.Width;
             // Get font data
-            font.GetCharData(letter, out ReadOnlySpan<ushort> charData);
-
-            // int b = 8 * (sizeof(ushort) - (int)Math.Ceiling(((double)font.Width) / 8)) + x;
+            font.GetCharData(value, out ReadOnlySpan<ushort> charData);
 
             for (int j = 0; j < charData.Length; j++)
             {
                 int bit = font.Width > 8 ? 0x8000 : 0x80;
                 ushort glyph = charData[j];
-                for (int i = 0; i < font.Width; i++)
+
+                if (firstColumnToDraw > 0)
+                {
+                    bit >>= firstColumnToDraw;
+                }
+
+                for (int i = firstColumnToDraw; i < lastColumnToDraw; i++)
                 {
                     _matrix[x + i, y + j] = (glyph & bit) is 0 ? 0 : 1;
-                    bit = bit >> 1;
+                    bit >>= 1;
                 }
             }
         }
