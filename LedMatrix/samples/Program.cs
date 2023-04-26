@@ -24,10 +24,11 @@ int halfHeight = matrix.Height / 2;
 // Console.WriteLine("Attach");
 // Console.ReadLine();
 
-ledMatrix.ScrollingText("Richard Eric Lander", 50);
-// ledMatrix.DrawLetter('R', 60, 0);
 
-Console.WriteLine();
+while (true)
+{
+    ledMatrix.ScrollingText("Hello .NET ... I'm having a scrolling time!", 50);
+}
 
 public class ConsoleMatrix : IMatrix
 {
