@@ -13,15 +13,13 @@ namespace Iot.Device.Matrix
     public class LedMatrix
     {
         private IMatrix _matrix;
-        private BdfFont _font;
 
         /// <summary>
         /// Initialize LedMatrix.
         /// </summary>
-        public LedMatrix(IMatrix matrix, BdfFont font)
+        public LedMatrix(IMatrix matrix)
         {
             _matrix = matrix;
-            _font = font;
         }
 
         // Scroll text from right to left
@@ -30,35 +28,35 @@ namespace Iot.Device.Matrix
         // matrix: 100 width
         // viewport = matrix-width / font-width
         // 
-        public void ScrollingText(ReadOnlySpan<char> text, int delay)
+        public bool ScrollText(ReadOnlySpan<char> text, BdfFont font, int index, int y = 0)
         {
-            int viewport = _matrix.Width / _font.Width;
-            int columns = (_font.Width * text.Length) + _matrix.Width;
-            int width = _matrix.Width;
-            int negativeWidth = 0 - _font.Width;
+            int columns = (font.Width * text.Length) + _matrix.Width;
+            int cursor = _matrix.Width - index;
+            int negativeWidth = 0 - font.Width;
             int start = 0;
-            for (int i = 0; i < columns; i++)
+
+            if (index > columns)
             {
-                width -= 1;
-
-                if (width <= negativeWidth)
-                {
-                    width += _font.Width;
-                    start++;
-                }
-
-                DrawText(text.Slice(start), width);
-                Thread.Sleep(delay);
+                return false;
             }
+
+            if (cursor < negativeWidth)
+            {
+                start = cursor / negativeWidth;
+                cursor += (font.Width * start);
+            }
+
+            DrawText(text.Slice(start), font, cursor, y);
+            return true;
         }
 
         /// <summary>
         /// Draw text on the LED matrix.
         /// </summary>
-        public void DrawText(ReadOnlySpan<char> value, int x = 0, int y = 0)
+        public void DrawText(ReadOnlySpan<char> value, BdfFont font, int x = 0, int y = 0)
         {
             int rollingX = x;
-            int negativeWidth = _font.Width * -1;
+            int negativeWidth = font.Width * -1;
 
             foreach(char c in value)
             {
@@ -67,19 +65,18 @@ namespace Iot.Device.Matrix
                     break;
                 }
                 
-                DrawLetter(c, rollingX, y);
-                rollingX += _font.Width;
+                DrawLetter(c, font, rollingX, y);
+                rollingX += font.Width;
             }
         }
 
         /// <summary>
         /// Draw text on the LED matrix.
         /// </summary>
-        public void DrawLetter(char value, int x = 0, int y = 0)
+        public void DrawLetter(char value, BdfFont font, int x = 0, int y = 0)
         {
             int width = _matrix.Width;
             int height = _matrix.Height;
-            BdfFont font = _font;
 
             int firstColumnToDraw = x < 0 ? Math.Abs(x) : 0;
             int lastColumnToDraw = x + font.Width > width ? width - x : font.Width;

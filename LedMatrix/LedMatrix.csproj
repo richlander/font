@@ -4,6 +4,7 @@
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Direction.cs" />
     <Compile Include="IMatrix.cs" />
     <Compile Include="LedMatrix.cs" />
   </ItemGroup>

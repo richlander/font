@@ -13,21 +13,29 @@ using System.Diagnostics;
 // using I2cDevice third = I2cDevice.Create(new I2cConnectionSettings(busId: 1, MicroDotPhat30x7.I2cAddresses[2]));
 // IMatrix matrix = new MicroDotPhat30x7(first, second, third);
 BdfFont font = BdfFont.Load(@"../../../iot/src/devices/RGBLedMatrix/samples/fonts/10x20.bdf");
+BdfFont smallFont = BdfFont.Load(@"../../../iot/src/devices/RGBLedMatrix/samples/fonts/4x6.bdf");
 int w = font.Width * 6;
 ConsoleMatrix matrix = new(WindowWidth, WindowHeight);
-LedMatrix ledMatrix = new LedMatrix(matrix, font);
+LedMatrix ledMatrix = new LedMatrix(matrix);
 int width = matrix.Width - 1;
 int height = matrix.Height - 1;
 int halfWidth = matrix.Width / 2;
 int halfHeight = matrix.Height / 2;
 
-// Console.WriteLine("Attach");
-// Console.ReadLine();
+Console.WriteLine("Attach");
+Console.ReadLine();
 
 
-while (true)
+bool scrolling = true;
+string text = "Hello .NET ... I'm having a scrolling time!";
+int columns = 0;
+while (scrolling)
 {
-    ledMatrix.ScrollingText("Hello .NET ... I'm having a scrolling time!", 50);
+
+    scrolling = ledMatrix.ScrollText(text, smallFont, columns);
+    scrolling = ledMatrix.ScrollText(text, font, columns, smallFont.Height);
+    columns++;
+    Thread.Sleep(50);
 }
 
 public class ConsoleMatrix : IMatrix
