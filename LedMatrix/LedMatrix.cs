@@ -28,11 +28,11 @@ namespace Iot.Device.Matrix
         // matrix: 100 width
         // viewport = matrix-width / font-width
         // 
-        public bool ScrollText(ReadOnlySpan<char> text, BdfFont font, int index, int y = 0)
+        public bool ScrollText(ReadOnlySpan<char> text, BdfFont font, Direction direction, int index, int y = 0)
         {
             int columns = (font.Width * text.Length) + _matrix.Width;
-            int cursor = _matrix.Width - index;
-            int negativeWidth = 0 - font.Width;
+            int cursor = direction is Direction.RightToLeft ? _matrix.Width - index : index;
+            int negativeWidth = direction is Direction.RightToLeft ? 0 - font.Width : _matrix.Width + font.Width;
             int start = 0;
 
             if (index > columns)
@@ -40,20 +40,28 @@ namespace Iot.Device.Matrix
                 return false;
             }
 
-            if (cursor < negativeWidth)
+            if (cursor < negativeWidth && direction is Direction.RightToLeft)
             {
                 start = cursor / negativeWidth;
                 cursor += (font.Width * start);
             }
+            else if (cursor > negativeWidth && direction is Direction.LeftToRight)
+            {
+                int w1 = cursor - _matrix.Width;
+                int w2 = negativeWidth - _matrix.Width;
+                start = w1 / w2;
+                cursor -= (font.Width * start); 
+            }
 
-            DrawText(text.Slice(start), font, cursor, y);
+            // bool reverse = direction is Direction.RightToLeft ? false : true;
+            DrawText(text.Slice(start), font, false, cursor, y);
             return true;
         }
 
         /// <summary>
         /// Draw text on the LED matrix.
         /// </summary>
-        public void DrawText(ReadOnlySpan<char> value, BdfFont font, int x = 0, int y = 0)
+        public void DrawText(ReadOnlySpan<char> value, BdfFont font, bool reverse = false, int x = 0, int y = 0)
         {
             int rollingX = x;
             int negativeWidth = font.Width * -1;
@@ -66,7 +74,7 @@ namespace Iot.Device.Matrix
                 }
                 
                 DrawLetter(c, font, rollingX, y);
-                rollingX += font.Width;
+                rollingX += reverse ? negativeWidth : font.Width;
             }
         }
 
