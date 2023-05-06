@@ -15,7 +15,6 @@ using Spectre.Console;
 // IMatrix matrix = new MicroDotPhat30x7(first, second, third);
 BdfFont font = BdfFont.Load(@"../../../iot/src/devices/RGBLedMatrix/samples/fonts/10x20.bdf");
 BdfFont smallFont = BdfFont.Load(@"../../../iot/src/devices/RGBLedMatrix/samples/fonts/4x6.bdf");
-int w = font.Width * 6;
 int width = WindowWidth;
 int height = WindowHeight;
 Canvas canvas = new Canvas(width, height);
@@ -25,26 +24,30 @@ AnsiConsoleMatrix matrix = new(width, height, canvas);
 matrix.Fill(0);
 AnsiConsole.Write(canvas);
 LedMatrix ledMatrix = new LedMatrix(matrix);
-int halfWidth = matrix.Width / 2;
-int halfHeight = matrix.Height / 2;
 
 // WriteLine(height);
 
-// Console.WriteLine("Attach");
-// Console.ReadLine();
+Console.WriteLine("Attach");
+Console.ReadLine();
+
+// ledMatrix.DrawLetter('A', font, -3, -6);
+// ledMatrix.DrawLetter('A', font, width - 8, height - 12);
+// ledMatrix.DrawLetter('A', font, width - 8, -6);
+// ledMatrix.DrawLetter('A', font,-3, height - 12);
 
 
-bool scrolling = true;
-string text = "NHello .NET ... I'm having a scrolling time!";
-string text2 = "dotnet";
-int columns = 0;
-while (scrolling)
+AnsiConsole.Write(canvas);
+
+string textOne = "dotnet";
+string textTwo = "Hello .NET ... scrolling!";
+ScrollData lineOne = new(Direction.LeftToRight);
+ScrollData lineTwo = new(Direction.RightToLeft);
+
+while (!lineTwo.IsComplete)
 {
-
-    scrolling = ledMatrix.ScrollText(text2, font, Direction.LeftToRight, columns, 3);
-    scrolling = ledMatrix.ScrollText(text, smallFont, Direction.RightToLeft, columns, 2);
+    lineOne = ledMatrix.ScrollText(textOne, font, lineOne, 3).Repeat(2).Reverse();
+    lineTwo = ledMatrix.ScrollText(textTwo, smallFont, lineTwo, 2).Repeat();
     AnsiConsole.Write(canvas);
-    columns++;
     Thread.Sleep(50);
 }
 
@@ -74,8 +77,6 @@ public class ConsoleMatrix : IMatrix
         SetCursorPosition(x,y);
         Write(value == PinValue.High ? '*' : ' ');
     }
-
-    // private int GetAddress(int x, int y) => x + (y * Width);
 }
 
 public class AnsiConsoleMatrix : IMatrix

@@ -23,29 +23,43 @@ namespace Iot.Device.Matrix
         }
 
         // Scroll text from right to left
-        // Example:
-        // text: 20 characters * 10 width font
-        // matrix: 100 width
-        // viewport = matrix-width / font-width
-        // 
-        public bool ScrollText(ReadOnlySpan<char> text, BdfFont font, Direction direction, int index, int y = 0)
+        public ScrollData ScrollText(ReadOnlySpan<char> text, BdfFont font, ScrollData data, int y = 0)
         {
-            int columns = (font.Width * text.Length) + _matrix.Width;
-            int cursor = direction is Direction.RightToLeft ? _matrix.Width - index : index;
-            int negativeWidth = direction is Direction.RightToLeft ? 0 - font.Width : _matrix.Width + font.Width;
+            if (data.IsComplete)
+            {
+                return data;
+            }
+
+            data.IsComplete = ScrollText(text, font, data.Index, data.Direction, y);
+            
+            if (!data.IsComplete)
+            {
+                data.Index++;
+            }
+
+            return data;
+        }
+
+        // Scroll text from right to left
+        public bool ScrollText(ReadOnlySpan<char> text, BdfFont font, int index, Direction direction, int y = 0)
+        {
+            int textWidth = font.Width * text.Length;
+            int columns = textWidth + _matrix.Width;
+            int cursor = direction is Direction.RightToLeft ? _matrix.Width - index : index - textWidth;
+            int negativeWidth = 0 - font.Width;
             int start = 0;
 
             if (index > columns)
             {
-                return false;
+                return true;
             }
 
-            if (cursor < negativeWidth && direction is Direction.RightToLeft)
+            if (direction is Direction.RightToLeft && cursor < negativeWidth)
             {
                 start = cursor / negativeWidth;
                 cursor += (font.Width * start);
             }
-            else if (cursor > negativeWidth && direction is Direction.LeftToRight)
+            else if (direction is Direction.LeftToRight && cursor > _matrix.Width)
             {
                 int w1 = cursor - _matrix.Width;
                 int w2 = negativeWidth - _matrix.Width;
@@ -55,7 +69,7 @@ namespace Iot.Device.Matrix
 
             // bool reverse = direction is Direction.RightToLeft ? false : true;
             DrawText(text.Slice(start), font, false, cursor, y);
-            return true;
+            return false;
         }
 
         /// <summary>
@@ -86,12 +100,16 @@ namespace Iot.Device.Matrix
             int width = _matrix.Width;
             int height = _matrix.Height;
 
-            int firstColumnToDraw = x < 0 ? Math.Abs(x) : 0;
-            int lastColumnToDraw = x + font.Width > width ? width - x : font.Width;
             // Get font data
             font.GetCharData(value, out ReadOnlySpan<ushort> charData);
 
-            for (int j = 0; j < charData.Length; j++)
+            // Calculate dimensions
+            int firstRowToDraw = y < 0 ? Math.Abs(y) : 0;
+            int lastRowToDraw = y + font.Height > height ? height - y : charData.Length;
+            int firstColumnToDraw = x < 0 ? Math.Abs(x) : 0;
+            int lastColumnToDraw = x + font.Width > width ? width - x : font.Width;
+
+            for (int j = firstRowToDraw; j < lastRowToDraw; j++)
             {
                 int bit = font.Width > 8 ? 0x8000 : 0x80;
                 ushort glyph = charData[j];
