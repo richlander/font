@@ -23,21 +23,25 @@ namespace Iot.Device.Matrix
         }
 
         // Scroll text from right to left
-        public ScrollData ScrollText(ReadOnlySpan<char> text, BdfFont font, ScrollData data, int y = 0)
+        public ref ScrollData ScrollText(ReadOnlySpan<char> text, BdfFont font, ref ScrollData data, int y = 0)
         {
-            if (data.IsComplete)
+            if (data.IsCompleted)
             {
-                return data;
+                return ref data;
             }
-
-            data.IsComplete = ScrollText(text, font, data.Index, data.Direction, y);
             
-            if (!data.IsComplete)
+            bool scrollComplete = ScrollText(text, font, data.Index, data.Direction, y);
+
+            if (scrollComplete)
+            {
+                data.Index = 0;
+            }
+            else
             {
                 data.Index++;
             }
 
-            return data;
+            return ref data;
         }
 
         // Scroll text from right to left

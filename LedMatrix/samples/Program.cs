@@ -43,12 +43,16 @@ string textTwo = "Hello .NET ... scrolling!";
 ScrollData lineOne = new(Direction.LeftToRight);
 ScrollData lineTwo = new(Direction.RightToLeft);
 
-while (!lineTwo.IsComplete)
+while (!lineOne.IsCompleted)
 {
-    lineOne = ledMatrix.ScrollText(textOne, font, lineOne, 3).Repeat(2).Reverse();
-    lineTwo = ledMatrix.ScrollText(textTwo, smallFont, lineTwo, 2).Repeat();
+    if (lineTwo.Index % 3 is not 0)
+    {
+        ledMatrix.ScrollText(textOne, font, ref lineOne, 3).Repeat(2).Reverse();
+    }
+
+    ledMatrix.ScrollText(textTwo, smallFont, ref lineTwo, 2).Repeat();
     AnsiConsole.Write(canvas);
-    Thread.Sleep(50);
+    Thread.Sleep(45);
 }
 
 public class ConsoleMatrix : IMatrix

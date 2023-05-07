@@ -2,7 +2,7 @@ namespace Iot.Device.Matrix
 {
     public enum Direction
     {
-        RightToLeft,
-        LeftToRight
+        RightToLeft = 0,
+        LeftToRight = 1,
     }
 }
